@@ -1,4 +1,3 @@
-from roman import fromRoman as from_roman
 from lib.pokedb import PokeDB
 from lib.generation import Generation
 
@@ -18,9 +17,9 @@ class Pokemon:
 class Pokedex:
     def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeDB, generation: Generation):
         pokemon_api = pokedb["pokemon/{}".format(pokemon_name)]
-        self._dex_by_name[pokemon_name] = dict()
-        self._dex_by_name[pokemon_name]["name"] = pokemon_name
-        self._dex_by_name[pokemon_name]["is_fully_evolved"] = True
+        self._raw_dex[pokemon_name] = dict()
+        self._raw_dex[pokemon_name]["name"] = pokemon_name
+        self._raw_dex[pokemon_name]["is_fully_evolved"] = True
 
         pokemon_types_api = pokemon_api["types"]
         for past_pokemon_types_api in pokemon_api["past_types"]:
@@ -28,12 +27,12 @@ class Pokedex:
             if generation <= past_generation:
                 pokemon_types_api = past_pokemon_types_api["types"]
         
-        self._dex_by_name[pokemon_name]["typing"] = [type_header["type"]["name"] for type_header in pokemon_types_api]
+        self._raw_dex[pokemon_name]["typing"] = [type_header["type"]["name"] for type_header in pokemon_types_api]
 
         pokemon_species_api = pokedb["pokemon-species/{}".format(pokemon_name)]
-        self._dex_by_name[pokemon_name]["is_legendary"] = pokemon_species_api["is_legendary"]
-        self._dex_by_name[pokemon_name]["is_mythical"] = pokemon_species_api["is_mythical"]
-        self._dex_by_name[pokemon_name]["dex_numbers"] = {
+        self._raw_dex[pokemon_name]["is_legendary"] = pokemon_species_api["is_legendary"]
+        self._raw_dex[pokemon_name]["is_mythical"] = pokemon_species_api["is_mythical"]
+        self._raw_dex[pokemon_name]["dex_numbers"] = {
             entry["pokedex"]["name"]: entry["entry_number"] for entry in pokemon_species_api["pokedex_numbers"]}
 
     def _mark_evolution(self, chain_node: dict):
@@ -41,11 +40,11 @@ class Pokedex:
         if pokemon_name not in self.get_all_pokemon_names():
             return
 
-        self._dex_by_name[pokemon_name]["is_fully_evolved"] = True
+        self._raw_dex[pokemon_name]["is_fully_evolved"] = True
         for evolution_chain_node in chain_node["evolves_to"]:
             if evolution_chain_node["species"]["name"] not in self.get_all_pokemon_names():
                 continue
-            self._dex_by_name[pokemon_name]["is_fully_evolved"] = False
+            self._raw_dex[pokemon_name]["is_fully_evolved"] = False
             self._mark_evolution(evolution_chain_node)
 
     def _postprocess_init(self, pokedb: PokeDB, generation: int):
@@ -54,11 +53,12 @@ class Pokedex:
             self._mark_evolution(pokedb["evolution-chain/{}".format(chain_id)]["chain"])
         
         for pokemon_name in self.get_all_pokemon_names():
-            pokemon = Pokemon(self._dex_by_name[pokemon_name])
+            pokemon = Pokemon(self._raw_dex[pokemon_name])
             self._dex_by_id[pokemon.id] = pokemon
             self._dex_by_name[pokemon_name] = pokemon
 
     def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
+        self._raw_dex = dict()
         self._dex_by_name = dict()
         self._dex_by_id = dict()
 
@@ -70,7 +70,7 @@ class Pokedex:
         self._postprocess_init(pokedb, generation)
     
     def get_all_pokemon_names(self):
-        return self._dex_by_name.keys()
+        return self._raw_dex.keys()
     
     def get_pokemon_by_name(self, pokemon_name: str) -> Pokemon:
         return self._dex_by_name[pokemon_name]

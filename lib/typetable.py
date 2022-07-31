@@ -1,8 +1,6 @@
 from lib.pokedb import PokeDB
 from lib.generation import Generation
 
-from roman import fromRoman as from_roman
-
 class TypeTable:
     def _fetch_type_from_pokedb(self, typename: str, pokedb: PokeDB, generation: Generation):
         type_api = pokedb["type/{}".format(typename)]

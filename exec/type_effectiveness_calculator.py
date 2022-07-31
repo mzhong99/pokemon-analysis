@@ -5,6 +5,7 @@ import itertools
 from lib.pokedb import PokeDB
 from lib.typetable import TypeTable
 from lib.pokedex import Pokedex
+from lib.movedex import MoveDex
 
 def main(args: list):
     parser = argparse.ArgumentParser(args)
@@ -48,6 +49,8 @@ def main(args: list):
                     super_effective.append(defending_pokemon.name)
                 if multiplier == 1.0:
                     neutrally_effective.append(defending_pokemon.name)
+
+    movedex = MoveDex(pokedb)
 
 if __name__ == "__main__":
     main(sys.argv)

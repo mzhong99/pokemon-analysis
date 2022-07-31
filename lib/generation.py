@@ -1,6 +1,8 @@
 from roman import toRoman as to_roman
 from roman import fromRoman as from_roman
 
+from lib.pokedb import PokeDB
+
 import functools
 
 @functools.total_ordering
@@ -25,3 +27,15 @@ class Generation:
 
     def __eq__(self, other):
         return self._gen_number == other._gen_number
+
+class VersionTable:
+    def __init__(self, pokedb: PokeDB):
+        self._table = dict()
+        for version_group_header in pokedb["version-group"]["results"]:
+            version_group_name = version_group_header["name"]
+            version_group_api = pokedb["version-group/{}".format(version_group_name)]
+            generation = Generation.from_str(version_group_api["generation"]["name"])
+            self._table[version_group_name] = generation
+    
+    def version_group_to_generation(self, version_group: str):
+        return self._table[version_group]
