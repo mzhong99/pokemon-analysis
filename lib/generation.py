@@ -29,11 +29,11 @@ class Generation:
         return self._gen_number == other._gen_number
 
 class VersionTable:
-    def __init__(self, pokedb: PokeAPI):
+    def __init__(self, pokeapi: PokeAPI):
         self._table = dict()
-        for version_group_header in pokedb["version-group"]["results"]:
+        for version_group_header in pokeapi["version-group"]["results"]:
             version_group_name = version_group_header["name"]
-            version_group_api = pokedb["version-group/{}".format(version_group_name)]
+            version_group_api = pokeapi["version-group/{}".format(version_group_name)]
             generation = Generation.from_str(version_group_api["generation"]["name"])
             self._table[version_group_name] = generation
     

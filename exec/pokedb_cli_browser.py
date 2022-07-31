@@ -14,14 +14,14 @@ def main(args: list):
     parser.add_argument("--api-link", "-l", default="https://pokeapi.co/api/v2/")
 
     parsed_args = vars(parser.parse_args())
-    pokedb = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
+    pokeapi = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
 
     current_path = "."
 
     while True:
         prompt_str = "{} > ".format(os.path.join(parsed_args["api_link"], current_path))
 
-        completion_words = list(pokedb[current_path].keys())
+        completion_words = list(pokeapi[current_path].keys())
         completion_words.append("exit")
         completer = FuzzyWordCompleter(completion_words)
 

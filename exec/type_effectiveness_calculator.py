@@ -15,9 +15,9 @@ def main(args: list):
     parser.add_argument("--generation", "-g", type=int, default=5)
 
     parsed_args = vars(parser.parse_args())
-    pokedb = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
+    pokeapi = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
 
-    typetable = TypeTable(pokedb)
+    typetable = TypeTable(pokeapi)
 
     viable_movesets = list()
     for moveset in itertools.combinations(typetable.get_all_types(), parsed_args["num_moves"]):
@@ -33,7 +33,7 @@ def main(args: list):
     
     viable_movesets.sort(key=lambda moveset: len(moveset["super_effective_coverage"]))
 
-    pokedex = Pokedex(pokedb)
+    pokedex = Pokedex(pokeapi)
     pokemon_by_type_distribution = pokedex.get_competitive_type_distribution()
     
     for attacking_typename in typetable.get_all_types():
@@ -50,7 +50,7 @@ def main(args: list):
                 if multiplier == 1.0:
                     neutrally_effective.append(defending_pokemon.name)
 
-    movedex = MoveDex(pokedb)
+    movedex = MoveDex(pokeapi)
 
 if __name__ == "__main__":
     main(sys.argv)

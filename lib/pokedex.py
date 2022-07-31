@@ -15,8 +15,8 @@ class Pokemon:
         return str(self.__dict__)
 
 class Pokedex:
-    def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeAPI, generation: Generation):
-        pokemon_api = pokedb["pokemon/{}".format(pokemon_name)]
+    def _fetch_pokemon_from_pokeapi(self, pokemon_name: str, pokeapi: PokeAPI, generation: Generation):
+        pokemon_api = pokeapi["pokemon/{}".format(pokemon_name)]
         self._raw_dex[pokemon_name] = dict()
         self._raw_dex[pokemon_name]["name"] = pokemon_name
         self._raw_dex[pokemon_name]["is_fully_evolved"] = True
@@ -29,7 +29,7 @@ class Pokedex:
         
         self._raw_dex[pokemon_name]["typing"] = [type_header["type"]["name"] for type_header in pokemon_types_api]
 
-        pokemon_species_api = pokedb["pokemon-species/{}".format(pokemon_name)]
+        pokemon_species_api = pokeapi["pokemon-species/{}".format(pokemon_name)]
         self._raw_dex[pokemon_name]["is_legendary"] = pokemon_species_api["is_legendary"]
         self._raw_dex[pokemon_name]["is_mythical"] = pokemon_species_api["is_mythical"]
         self._raw_dex[pokemon_name]["dex_numbers"] = {
@@ -47,27 +47,27 @@ class Pokedex:
             self._raw_dex[pokemon_name]["is_fully_evolved"] = False
             self._mark_evolution(evolution_chain_node)
 
-    def _postprocess_init(self, pokedb: PokeAPI, generation: int):
-        evolution_chain_ids = [evolink["url"].strip("/").split("/")[-1] for evolink in pokedb["evolution-chain"]["results"]]
+    def _postprocess_init(self, pokeapi: PokeAPI, generation: int):
+        evolution_chain_ids = [evolink["url"].strip("/").split("/")[-1] for evolink in pokeapi["evolution-chain"]["results"]]
         for chain_id in evolution_chain_ids:
-            self._mark_evolution(pokedb["evolution-chain/{}".format(chain_id)]["chain"])
+            self._mark_evolution(pokeapi["evolution-chain/{}".format(chain_id)]["chain"])
         
         for pokemon_name in self.get_all_pokemon_names():
             pokemon = Pokemon(self._raw_dex[pokemon_name])
             self._dex_by_id[pokemon.id] = pokemon
             self._dex_by_name[pokemon_name] = pokemon
 
-    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
+    def __init__(self, pokeapi: PokeAPI, generation: Generation = Generation(1)):
         self._raw_dex = dict()
         self._dex_by_name = dict()
         self._dex_by_id = dict()
 
         for gen in range(1, generation.int_val() + 1):
-            new_pokemon_this_gen = [entry["name"] for entry in pokedb["generation/{}".format(gen)]["pokemon_species"]]
+            new_pokemon_this_gen = [entry["name"] for entry in pokeapi["generation/{}".format(gen)]["pokemon_species"]]
             for pokemon_name in new_pokemon_this_gen:
-                self._fetch_pokemon_from_pokedb(pokemon_name, pokedb, generation)
+                self._fetch_pokemon_from_pokeapi(pokemon_name, pokeapi, generation)
         
-        self._postprocess_init(pokedb, generation)
+        self._postprocess_init(pokeapi, generation)
     
     def get_all_pokemon_names(self):
         return self._raw_dex.keys()

@@ -13,8 +13,8 @@ class Move:
         return str(self.__dict__)
 
 class MoveDex:
-    def _fetch_move_from_pokedb(self, move_name: str, pokedb: PokeAPI, generation: Generation):
-        move_api = pokedb["move/{}".format(move_name)]
+    def _fetch_move_from_pokeapi(self, move_name: str, pokeapi: PokeAPI, generation: Generation):
+        move_api = pokeapi["move/{}".format(move_name)]
 
         raw_move = dict()
         raw_move["name"] = move_name
@@ -34,14 +34,24 @@ class MoveDex:
         raw_move["damage_class"] = move_api["damage_class"]["name"]
 
         self._dex_by_name[move_name] = Move(raw_move)
-        print(move_name, self._dex_by_name[move_name])
 
-    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
+    def _postprocess_init(self, pokeapi: PokeAPI):
+        damage_classes = [entry["name"] for entry in pokeapi["move-damage-class"]["results"]]
+        for damage_class in damage_classes:
+            self._dex_by_damage_class[damage_class] = [
+                move for move in self._dex_by_name.values() if move.damage_class == damage_class]
+        from pprint import pprint
+        pprint(self._dex_by_damage_class)
+
+    def __init__(self, pokeapi: PokeAPI, generation: Generation = Generation(1)):
         self._dex_by_name = dict()
-        self._version_table = VersionTable(pokedb)
+        self._dex_by_type = dict()
+        self._dex_by_damage_class = dict()
+        self._version_table = VersionTable(pokeapi)
 
         for gen in range(1, generation.int_val() + 1):
-            new_moves_this_gen = [entry["name"] for entry in pokedb["generation/{}".format(gen)]["moves"]]
+            new_moves_this_gen = [entry["name"] for entry in pokeapi["generation/{}".format(gen)]["moves"]]
             for move_name in new_moves_this_gen:
-                self._fetch_move_from_pokedb(move_name, pokedb, generation)
+                self._fetch_move_from_pokeapi(move_name, pokeapi, generation)
             
+        self._postprocess_init(pokeapi)
