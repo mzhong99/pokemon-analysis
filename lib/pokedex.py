@@ -1,4 +1,4 @@
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 from lib.generation import Generation
 
 class Pokemon:
@@ -15,7 +15,7 @@ class Pokemon:
         return str(self.__dict__)
 
 class Pokedex:
-    def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeDB, generation: Generation):
+    def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeAPI, generation: Generation):
         pokemon_api = pokedb["pokemon/{}".format(pokemon_name)]
         self._raw_dex[pokemon_name] = dict()
         self._raw_dex[pokemon_name]["name"] = pokemon_name
@@ -47,7 +47,7 @@ class Pokedex:
             self._raw_dex[pokemon_name]["is_fully_evolved"] = False
             self._mark_evolution(evolution_chain_node)
 
-    def _postprocess_init(self, pokedb: PokeDB, generation: int):
+    def _postprocess_init(self, pokedb: PokeAPI, generation: int):
         evolution_chain_ids = [evolink["url"].strip("/").split("/")[-1] for evolink in pokedb["evolution-chain"]["results"]]
         for chain_id in evolution_chain_ids:
             self._mark_evolution(pokedb["evolution-chain/{}".format(chain_id)]["chain"])
@@ -57,7 +57,7 @@ class Pokedex:
             self._dex_by_id[pokemon.id] = pokemon
             self._dex_by_name[pokemon_name] = pokemon
 
-    def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
+    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
         self._raw_dex = dict()
         self._dex_by_name = dict()
         self._dex_by_id = dict()

@@ -1,4 +1,4 @@
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 from lib.generation import Generation, VersionTable
 
 class Move:
@@ -13,7 +13,7 @@ class Move:
         return str(self.__dict__)
 
 class MoveDex:
-    def _fetch_move_from_pokedb(self, move_name: str, pokedb: PokeDB, generation: Generation):
+    def _fetch_move_from_pokedb(self, move_name: str, pokedb: PokeAPI, generation: Generation):
         move_api = pokedb["move/{}".format(move_name)]
 
         raw_move = dict()
@@ -33,11 +33,11 @@ class MoveDex:
         raw_move["power"] = move_api["power"]
         raw_move["damage_class"] = move_api["damage_class"]["name"]
 
-        self._table[move_name] = Move(raw_move)
-        print(move_name, self._table[move_name])
+        self._dex_by_name[move_name] = Move(raw_move)
+        print(move_name, self._dex_by_name[move_name])
 
-    def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
-        self._table = dict()
+    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
+        self._dex_by_name = dict()
         self._version_table = VersionTable(pokedb)
 
         for gen in range(1, generation.int_val() + 1):

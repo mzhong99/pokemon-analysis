@@ -1,7 +1,7 @@
 from roman import toRoman as to_roman
 from roman import fromRoman as from_roman
 
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 
 import functools
 
@@ -29,7 +29,7 @@ class Generation:
         return self._gen_number == other._gen_number
 
 class VersionTable:
-    def __init__(self, pokedb: PokeDB):
+    def __init__(self, pokedb: PokeAPI):
         self._table = dict()
         for version_group_header in pokedb["version-group"]["results"]:
             version_group_name = version_group_header["name"]

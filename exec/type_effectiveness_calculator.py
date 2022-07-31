@@ -2,7 +2,7 @@ import sys
 import argparse
 import itertools
 
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 from lib.typetable import TypeTable
 from lib.pokedex import Pokedex
 from lib.movedex import MoveDex
@@ -15,7 +15,7 @@ def main(args: list):
     parser.add_argument("--generation", "-g", type=int, default=5)
 
     parsed_args = vars(parser.parse_args())
-    pokedb = PokeDB(parsed_args["cache_dir"], parsed_args["api_link"])
+    pokedb = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
 
     typetable = TypeTable(pokedb)
 

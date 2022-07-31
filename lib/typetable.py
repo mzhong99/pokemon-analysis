@@ -1,8 +1,8 @@
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 from lib.generation import Generation
 
 class TypeTable:
-    def _fetch_type_from_pokedb(self, typename: str, pokedb: PokeDB, generation: Generation):
+    def _fetch_type_from_pokedb(self, typename: str, pokedb: PokeAPI, generation: Generation):
         type_api = pokedb["type/{}".format(typename)]
         self._table[typename] = dict()
 
@@ -18,7 +18,7 @@ class TypeTable:
                 opposing_typename = opposing_type_api["name"]
                 self._table[typename][opposing_typename] = multiplier
     
-    def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
+    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
         self._table = dict()
         raw_api_types = pokedb["type"]["results"]
 

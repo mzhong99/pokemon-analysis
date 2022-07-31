@@ -6,7 +6,7 @@ import prompt_toolkit
 from prompt_toolkit.completion import FuzzyWordCompleter
 
 
-from lib.pokedb import PokeDB
+from lib.pokeapi import PokeAPI
 
 def main(args: list):
     parser = argparse.ArgumentParser(args)
@@ -14,7 +14,7 @@ def main(args: list):
     parser.add_argument("--api-link", "-l", default="https://pokeapi.co/api/v2/")
 
     parsed_args = vars(parser.parse_args())
-    pokedb = PokeDB(parsed_args["cache_dir"], parsed_args["api_link"])
+    pokedb = PokeAPI(parsed_args["cache_dir"], parsed_args["api_link"])
 
     current_path = "."
 

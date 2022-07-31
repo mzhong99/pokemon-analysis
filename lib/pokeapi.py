@@ -3,7 +3,7 @@ import urllib.parse
 import os
 import json
 
-class PokeDB:
+class PokeAPI:
     NODE_FILE_NAME = "data.json"
 
     def __init__(self, cache_dir: str, api_link: str):
@@ -13,7 +13,7 @@ class PokeDB:
         os.makedirs(self._base_cache_dir, exist_ok=True)
 
     def _get_from_cache(self, endpoint: str):
-        cached_path = os.path.join(self._base_cache_dir, endpoint, PokeDB.NODE_FILE_NAME)
+        cached_path = os.path.join(self._base_cache_dir, endpoint, PokeAPI.NODE_FILE_NAME)
         if not os.path.isfile(cached_path):
             return None
         with open(cached_path, "r") as rawfile:
@@ -27,7 +27,7 @@ class PokeDB:
         response = requests.get(req.url)
         response.raise_for_status()
 
-        cached_path = os.path.join(self._base_cache_dir, endpoint, PokeDB.NODE_FILE_NAME)
+        cached_path = os.path.join(self._base_cache_dir, endpoint, PokeAPI.NODE_FILE_NAME)
         os.makedirs(os.path.dirname(cached_path), exist_ok=True)
         with open(cached_path, "w") as rawfile:
             rawfile.write(response.text)
