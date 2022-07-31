@@ -33,7 +33,8 @@ def main(args: list):
     
     viable_movesets.sort(key=lambda moveset: len(moveset["super_effective_coverage"]))
 
-    pokedex = Pokedex(pokeapi)
+    movedex = MoveDex(pokeapi)
+    pokedex = Pokedex(pokeapi, movedex)
     pokemon_by_type_distribution = pokedex.get_competitive_type_distribution()
     
     for attacking_typename in typetable.get_all_types():
@@ -50,7 +51,9 @@ def main(args: list):
                 if multiplier == 1.0:
                     neutrally_effective.append(defending_pokemon.name)
 
-    movedex = MoveDex(pokeapi)
+    bulbasaur = pokedex.get_pokemon_by_name("tauros")
+    import pprint
+    pprint.pprint(bulbasaur.movepool.get_all_moves())
 
 if __name__ == "__main__":
     main(sys.argv)
