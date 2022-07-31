@@ -1,5 +1,6 @@
 from roman import fromRoman as from_roman
 from lib.pokedb import PokeDB
+from lib.generation import Generation
 
 class Pokemon:
     def __init__(self, dex_raw: dict):
@@ -15,7 +16,7 @@ class Pokemon:
         return str(self.__dict__)
 
 class Pokedex:
-    def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeDB, generation: int):
+    def _fetch_pokemon_from_pokedb(self, pokemon_name: str, pokedb: PokeDB, generation: Generation):
         pokemon_api = pokedb["pokemon/{}".format(pokemon_name)]
         self._dex_by_name[pokemon_name] = dict()
         self._dex_by_name[pokemon_name]["name"] = pokemon_name
@@ -23,7 +24,7 @@ class Pokedex:
 
         pokemon_types_api = pokemon_api["types"]
         for past_pokemon_types_api in pokemon_api["past_types"]:
-            past_generation = int(from_roman(past_pokemon_types_api["generation"]["name"].split("-")[1].upper()))
+            past_generation = Generation.from_str(past_pokemon_types_api["generation"]["name"])
             if generation <= past_generation:
                 pokemon_types_api = past_pokemon_types_api["types"]
         
@@ -57,11 +58,11 @@ class Pokedex:
             self._dex_by_id[pokemon.id] = pokemon
             self._dex_by_name[pokemon_name] = pokemon
 
-    def __init__(self, pokedb: PokeDB, generation: int = 1):
+    def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
         self._dex_by_name = dict()
         self._dex_by_id = dict()
 
-        for gen in range(1, generation + 1):
+        for gen in range(1, generation.int_val() + 1):
             new_pokemon_this_gen = [entry["name"] for entry in pokedb["generation/{}".format(gen)]["pokemon_species"]]
             for pokemon_name in new_pokemon_this_gen:
                 self._fetch_pokemon_from_pokedb(pokemon_name, pokedb, generation)

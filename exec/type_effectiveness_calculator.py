@@ -6,8 +6,6 @@ from lib.pokedb import PokeDB
 from lib.typetable import TypeTable
 from lib.pokedex import Pokedex
 
-from pprint import pprint
-
 def main(args: list):
     parser = argparse.ArgumentParser(args)
     parser.add_argument("--cache-dir", "-d", default="~/.pokedb")

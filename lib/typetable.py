@@ -1,16 +1,16 @@
 from lib.pokedb import PokeDB
-from lib.pokedex import Pokemon
+from lib.generation import Generation
 
 from roman import fromRoman as from_roman
 
 class TypeTable:
-    def _fetch_type_from_pokedb(self, typename: str, pokedb: PokeDB, generation: int):
+    def _fetch_type_from_pokedb(self, typename: str, pokedb: PokeDB, generation: Generation):
         type_api = pokedb["type/{}".format(typename)]
         self._table[typename] = dict()
 
         damage_relations_api = type_api["damage_relations"]
         for past_damage_relations_api in type_api["past_damage_relations"]:
-            past_generation = int(from_roman(past_damage_relations_api["generation"]["name"].split("-")[1].upper()))
+            past_generation = Generation.from_str(past_damage_relations_api["generation"]["name"])
             if generation <= past_generation:
                 damage_relations_api = past_damage_relations_api["damage_relations"]
         
@@ -20,14 +20,14 @@ class TypeTable:
                 opposing_typename = opposing_type_api["name"]
                 self._table[typename][opposing_typename] = multiplier
     
-    def __init__(self, pokedb: PokeDB, generation: int = 1):
+    def __init__(self, pokedb: PokeDB, generation: Generation = Generation(1)):
         self._table = dict()
         raw_api_types = pokedb["type"]["results"]
 
         excluded_types = ["shadow", "unknown"]
-        if generation < 6:
+        if generation < Generation(6):
             excluded_types.extend(["fairy"])
-        if generation < 2:
+        if generation < Generation(2):
             excluded_types.extend(["dark", "steel"])
 
         for api_type_header in raw_api_types:
