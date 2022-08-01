@@ -4,7 +4,7 @@ import itertools
 
 from lib.pokeapi import PokeAPI
 from lib.typetable import TypeTable
-from lib.pokedex import Pokedex
+from lib.pokedex import PokeDex
 from lib.movedex import MoveDex
 
 def main(args: list):
@@ -34,7 +34,7 @@ def main(args: list):
     viable_movesets.sort(key=lambda moveset: len(moveset["super_effective_coverage"]))
 
     movedex = MoveDex(pokeapi)
-    pokedex = Pokedex(pokeapi, movedex)
+    pokedex = PokeDex(pokeapi, movedex)
     pokemon_by_type_distribution = pokedex.get_competitive_type_distribution()
     
     for attacking_typename in typetable.get_all_types():
@@ -51,9 +51,10 @@ def main(args: list):
                 if multiplier == 1.0:
                     neutrally_effective.append(defending_pokemon.name)
 
-    bulbasaur = pokedex.get_pokemon_by_name("tauros")
     import pprint
-    pprint.pprint(bulbasaur.movepool.get_all_moves())
+    the_pokemon = pokedex.get_pokemon_by_name("pikachu")
+    for move in the_pokemon.movepool.subpool(lambda move: move.accuracy >= 75 and move.power >= 80):
+        pprint.pprint(move)
 
 if __name__ == "__main__":
     main(sys.argv)

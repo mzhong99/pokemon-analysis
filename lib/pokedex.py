@@ -21,7 +21,7 @@ class Pokemon:
     def __repr__(self):
         return str(self.__dict__)
 
-class Pokedex:
+class PokeDex:
     def _fetch_pokemon_from_pokeapi(self, pokemon_name: str, pokeapi: PokeAPI, generation: Generation):
         pokemon_api = pokeapi["pokemon/{}".format(pokemon_name)]
         self._raw_dex[pokemon_name] = dict()

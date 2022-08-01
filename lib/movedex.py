@@ -6,8 +6,8 @@ class Move:
     def __init__(self, raw_move: dict):
         self.name = raw_move["name"]
         self.type = raw_move["type"]
-        self.accuracy = raw_move["accuracy"]
-        self.power = raw_move["power"]
+        self.accuracy = raw_move["accuracy"] if raw_move["accuracy"] != None else 100
+        self.power = raw_move["power"] if raw_move["power"] != None else 0
         self.damage_class = raw_move["damage_class"]
         self.priority = raw_move["priority"]
 
@@ -63,9 +63,9 @@ class MoveDex:
     def get_move_by_name(self, move_name: str) -> Move:
         return self._dex_by_name[move_name]
 
-class MovePool:
+class MovePool(object):
     def _has_direct_upgrade(self, move: Move):
-        for other_move in self.get_all_moves():
+        for other_move in self:
             if move == other_move:
                 continue
             _, superior_move = move.compare_to(other_move)
@@ -74,31 +74,26 @@ class MovePool:
                 return True
         return False
 
-    def __init__(self, movedex: MoveDex, move_names: list,
-        prune_direct_upgrades: bool = True, min_accuracy: int = 85, min_power: int = 75):
+    def __init__(self, movedex: MoveDex, move_names: list, prune_direct_upgrades: bool = True):
+        self._movedex = movedex
         self._moves_by_name = dict()
-        self._moves_by_damage_class = dict()
 
         for move_name in move_names:
             self._moves_by_name[move_name] = movedex.get_move_by_name(move_name)
         
         for move_name in move_names:
             move = self._moves_by_name[move_name]
-            if move.accuracy != None and move.accuracy < min_accuracy:
-                del self._moves_by_name[move_name]
-                continue
-            if move.power != None and move.power < min_power:
-                del self._moves_by_name[move_name]
-                continue
             if prune_direct_upgrades and self._has_direct_upgrade(move):
                 del self._moves_by_name[move_name]
                 continue
-        
-        for move in self.get_all_moves():
-            self._moves_by_damage_class[move.damage_class] = move
 
-    def get_all_moves(self):
-        return [move for move in self._moves_by_name.values()]
+    def __iter__(self):
+        return self._moves_by_name.values().__iter__()
     
-    def get_moves_by_damage_class(self, damage_class: str):
-        return [move for move in self._moves_by_damage_class[damage_class]]
+    def subpool(self, filter_function):
+        class Empty(object): pass
+        subpool_copy = Empty()
+        subpool_copy.__class__ = MovePool
+        subpool_copy._movedex = self._movedex
+        subpool_copy._moves_by_name = {move.name: move for move in self if filter_function(move)}
+        return subpool_copy

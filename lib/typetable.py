@@ -18,9 +18,9 @@ class TypeTable:
                 opposing_typename = opposing_type_api["name"]
                 self._table[typename][opposing_typename] = multiplier
     
-    def __init__(self, pokedb: PokeAPI, generation: Generation = Generation(1)):
+    def __init__(self, pokeapi: PokeAPI, generation: Generation = Generation(1)):
         self._table = dict()
-        raw_api_types = pokedb["type"]["results"]
+        raw_api_types = pokeapi["type"]["results"]
 
         excluded_types = ["shadow", "unknown"]
         if generation < Generation(6):
@@ -36,7 +36,7 @@ class TypeTable:
         for api_type_header in raw_api_types:
             typename = api_type_header["name"]
             if typename not in excluded_types:
-                self._fetch_type_from_pokedb(typename, pokedb, generation)
+                self._fetch_type_from_pokedb(typename, pokeapi, generation)
         
         for typename_from in self._table.keys():
             for typename_to in self._table.keys():
