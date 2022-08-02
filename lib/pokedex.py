@@ -98,19 +98,12 @@ class PokeDex:
     def get_pokemon_by_id(self, id: int) -> Pokemon:
         return self._dex_by_id[id]
     
-    def get_competitive_pokemon(self,
-        include_mythicals: bool = False, include_legendaries: bool = False, include_not_fully_evolved: bool = False):
-        competitive_pokemon = list()
-        for name in self.get_all_pokemon_names():
-            pokemon = self.get_pokemon_by_name(name)
-            if pokemon.is_legendary != include_legendaries:
-                continue
-            if pokemon.is_mythical != include_mythicals:
-                continue
-            if pokemon.has_evolution != include_not_fully_evolved:
-                continue
-            competitive_pokemon.append(pokemon)
-        return competitive_pokemon
+    def get_competitive_pokemon(self):
+        return self.get_pokemon_by_query(lambda pokemon:
+            not pokemon.is_legendary and not pokemon.is_mythical and not pokemon.has_evolution)
+
+    def get_pokemon_by_query(self, filter_function):
+        return [pokemon for pokemon in self._dex_by_name.values() if filter_function(pokemon)]
     
     def get_competitive_type_distribution(self,
         include_mythicals: bool = False, include_legendaries: bool = False, include_not_fully_evolved: bool = False):
